@@ -1,0 +1,9 @@
+{
+  "name": "bank-app",
+  "version": "1.0.0",
+  "description": "Bank app for study purposes",
+  "main": "src/index.js",
+  "repository": "git@github.com:guifwiener/bank-app.git",
+  "author": "guifwiener <gfw1994@gmail.com>",
+  "license": "MIT"
+}
