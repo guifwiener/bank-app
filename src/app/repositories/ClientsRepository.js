@@ -40,6 +40,25 @@ class ClientsRepository {
     `, [first_name, last_name]);
     return row;
   }
+
+  async update(id, { first_name, last_name }) {
+    const [row] = await db.query(`
+      UPDATE clients
+      SET first_name = $1
+        , last_name = $2
+      WHERE id = $3
+      RETURNING *
+    `, [first_name, last_name, id]);
+    return row;
+  }
+
+  async delete(id) {
+    const deleteOp = await db.query(`
+      DELETE from clients
+      WHERE id = $1
+    `, [id]);
+    return deleteOp;
+  }
 }
 
 module.exports = new ClientsRepository();

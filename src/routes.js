@@ -15,5 +15,7 @@ router.delete('/accounts/:id', AccountController.delete);
 router.get('/clients', ClientController.index);
 router.get('/clients/:id', ClientController.show);
 router.post('/clients', ClientController.store);
+router.put('/clients/:id', ClientController.update);
+router.delete('/clients/:id', ClientController.delete);
 
 module.exports = router;
