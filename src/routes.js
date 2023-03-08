@@ -13,5 +13,7 @@ router.delete('/accounts/:id', AccountController.delete);
 
 // Clients routes
 router.get('/clients', ClientController.index);
+router.get('/clients/:id', ClientController.show);
+router.post('/clients', ClientController.store);
 
 module.exports = router;
