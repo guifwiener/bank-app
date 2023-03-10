@@ -5,7 +5,6 @@ class AccountController {
     const { orderBy } = request.params;
     const accounts = await AccountsRepository.findAll(orderBy);
     return response.json(accounts);
-    // response.send('Send from Account Controller');
   }
 
   async show(request, response) {

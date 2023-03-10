@@ -1,59 +1,72 @@
-const { v4 } = require('uuid');
 const db = require('../../database');
-
-let accounts = [
-  {
-    id: v4(),
-    password: '123abc',
-    owner_id: v4(),
-    balance: 100,
-    account_level_id: v4(),
-  },
-];
 
 class AccountsRepository {
   async findAll(orderBy = 'ASC') {
-    return new Promise((resolve) => {
-      resolve(accounts);
-    });
-    // const direction = orderBy.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
-    // const rows = await db.query(`SELECT * FROM accounts ORDER BY id ${direction}`);
-    // return rows;
+    const direction = orderBy.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+    const rows = await db.query(`
+    SELECT acc.id
+          , acc.owner_id
+          , cli.first_name
+          , cli.last_name
+          , acc.balance
+          , acc.account_level_id
+          , lvl.name
+          , lvl.max_balance
+          , lvl.benefits
+          , lvl.price_per_month
+    FROM accounts acc
+      JOIN clients cli
+      ON acc.owner_id = cli.id
+      JOIN account_levels lvl
+      ON acc.account_level_id = lvl.id
+    ORDER BY id ${direction}`);
+    return rows;
   }
 
   async findById(id) {
-    return new Promise((resolve) => {
-      resolve(accounts.find((account) => account.id === id));
-    });
+    const [row] = await db.query(`
+      SELECT acc.id
+        , acc.owner_id
+        , cli.first_name
+        , cli.last_name
+        , acc.balance
+        , acc.account_level_id
+        , lvl.name
+        , lvl.max_balance
+        , lvl.benefits
+        , lvl.price_per_month
+      FROM accounts acc
+      JOIN clients cli
+      ON acc.owner_id = cli.id
+      JOIN account_levels lvl
+      ON acc.account_level_id = lvl.id
+      WHERE acc.id = $1
+    `, [id]);
+    return row;
   }
 
   async findByOwner(owner_id) {
-    return new Promise((resolve) => {
-      resolve(accounts.find((account) => account.owner_id === owner_id));
-    });
+    const [row] = await db.query(`
+      SELECT *
+      FROM accounts
+      WHERE owner_id = $1
+    `, [owner_id]);
+    return row;
   }
 
   async findByLevel(account_level_id) {
-    return new Promise((resolve) => {
-      resolve(accounts.find((account) => account.account_level_id === account_level_id));
-    });
+    const [row] = await db.query(`
+      SELECT *
+      FROM accounts
+      WHERE account_level_id = $1
+    `, [account_level_id]);
+    return row;
   }
 
   async create({
     password, owner_id, balance, account_level_id,
   }) {
-    // return new Promise((resolve) => {
-    //   const row = {
-    //     id: v4(),
-    //     password,
-    //     owner_id,
-    //     balance,
-    //     account_level_id,
-    //   };
-    //   accounts.push(row);
-    //   resolve(row);
-    // });
-    const row = await db.query(`
+    const [row] = await db.query(`
       INSERT INTO accounts (
         password, owner_id, balance, account_level_id
       ) VALUES (
@@ -66,20 +79,25 @@ class AccountsRepository {
   async update(id, {
     password, owner_id, balance, account_level_id,
   }) {
-    return new Promise((resolve) => {
-      let row = accounts.find((account) => account.id === id);
-      row = {
-        id, password, owner_id, balance, account_level_id,
-      };
-      resolve(row);
-    });
+    const [row] = await db.query(`
+      UPDATE accounts
+      SET password = $1
+          , owner_id = $2
+          , balance = $3
+          , account_level_id = $4
+      WHERE id = $5
+      RETURNING *
+    `, [password, owner_id, balance, account_level_id, id]);
+    return row;
   }
 
   async delete(id) {
-    return new Promise((resolve) => {
-      accounts = accounts.filter((account) => account.id !== id);
-      resolve();
-    });
+    const [deleteOp] = await db.query(`
+      DELETE from accounts
+      WHERE id = $1
+    `, [id]);
+    return deleteOp;
+    // });
   }
 }
 
